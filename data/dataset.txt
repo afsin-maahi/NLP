@@ -1,0 +1,4 @@
+Java is a programming language.
+Python is used for AI.
+Machine Learning is amazing.
+Deep Learning uses neural networks.
