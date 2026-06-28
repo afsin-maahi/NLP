@@ -8,6 +8,8 @@ import string
 import emoji
 import contractions
 import nltk
+from textblob import TextBlob
+from pathlib import Path
 from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer, WordNetLemmatizer
@@ -15,6 +17,17 @@ from nltk.stem import PorterStemmer, WordNetLemmatizer
 nltk.download("stopwords")
 nltk.download("wordnet")
 nltk.download("omw-1.4")
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "data"
+CHAT_WORDS = {}
+with open(DATA_DIR / "slang.txt", encoding="utf-8") as file:
+    for line in file:
+        key, value = line.strip().split("=", 1)
+        CHAT_WORDS[key.lower()] = value.lower()
+
+
 
 def remove_html(text):
     return BeautifulSoup(text, "html.parser").get_text()
@@ -74,6 +87,25 @@ def lemmatization(tokens):
     return [LEMMATIZER.lemmatize(word) for word in tokens]
 
 
+def remove_html_tags(text):
+    pattern=re.compile('<.*?>')
+    return pattern.sub(r'',text)
+
+
+def expand_chat_words(text):
+    words = text.split()
+    expanded_words = []
+    for word in words:
+        expanded_words.append(
+            CHAT_WORDS.get(word.lower(), word)
+        )
+    return " ".join(expanded_words)
+
+
+def correct_spelling(text):
+    return str(TextBlob(text).correct())
+
+
 text = """
 <html>
 <body>
@@ -104,4 +136,7 @@ tokens = remove_stopwords(tokens)
 tokens = lemmatization(tokens)
 clean_text = " ".join(tokens)
 
-print(clean_text)
+# print(clean_text)
+
+text = "I realy luv this movi"
+print(correct_spelling(text))
